@@ -1,13 +1,13 @@
 {
   "name": "remove-bg-server",
   "version": "1.0.0",
-  "main": "server.js",
   "type": "module",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "background-removal": "^2.2.0",
+    "@imgly/background-removal-node": "^1.4.5",
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "multer": "^1.4.5"
