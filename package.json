@@ -1,7 +1,6 @@
 {
   "name": "remove-bg-server",
   "version": "1.0.0",
-  "description": "Simple background removal server for Figma plugin",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -14,4 +13,3 @@
     "multer": "^1.4.5"
   }
 }
-
