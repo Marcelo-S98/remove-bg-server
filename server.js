@@ -1,41 +1,50 @@
 import express from "express";
-import multer from "multer";
 import cors from "cors";
-import { removeBackground } from "background-removal";
+import multer from "multer";
+import { removeBackground } from "@imgly/background-removal-node";
 
 const app = express();
 const upload = multer();
 
+// CORS básico
 app.use(cors());
+app.use(express.json());
 
+// Healthcheck
 app.get("/health", (req, res) => {
   res.json({ status: "ok" });
 });
 
-app.post("/remove-bg", upload.single("file"), async (req, res) => {
+// Rota principal para remover fundo
+app.post("/remove-bg", upload.single("image"), async (req, res) => {
   try {
     if (!req.file || !req.file.buffer) {
-      return res.status(400).json({ error: "Nenhum arquivo enviado" });
+      return res.status(400).json({ error: "Nenhuma imagem enviada" });
     }
 
-    const inputBuffer = req.file.buffer;
+    // Cria um Blob a partir do buffer recebido
+    const imageBlob = new Blob([req.file.buffer]);
 
-    const output = await removeBackground(inputBuffer, {
-      format: "png",
-      model: "u2net",
-      alphaMatting: false
+    // removeBackground retorna um Blob com o PNG já recortado
+    const resultBlob = await removeBackground(imageBlob, {
+      // você pode passar opções aqui (modelo 'medium', etc) se quiser
+      // model: "medium"
     });
 
-    res.set("Content-Type", "image/png");
-    res.send(Buffer.from(output));
+    // Converte Blob → Buffer para enviar na resposta HTTP
+    const arrayBuffer = await resultBlob.arrayBuffer();
+    const outputBuffer = Buffer.from(arrayBuffer);
+
+    res.setHeader("Content-Type", "image/png");
+    res.send(outputBuffer);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: String(error) });
+    console.error("Erro ao remover fundo:", error);
+    res.status(500).json({ error: "Erro ao processar a imagem" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
-});
 
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
